@@ -202,6 +202,79 @@ export interface SuggestionStats {
   averagePerUser: number
 }
 
+export interface Payment {
+  id: string
+  userId: string
+  user: {
+    id: string
+    username: string | null
+    phone: string | null
+    email: string | null
+  }
+  plan: 'MONTHLY' | 'ANNUAL'
+  amount: number
+  status: 'PENDING_VERIFICATION' | 'APPROVED' | 'REJECTED'
+  waveTransactionId: string
+  senderName: string
+  transferDate: string
+  rejectionReason?: string | null
+  rejectedAt?: string | null
+  rejectedById?: string | null
+  approvedAt?: string | null
+  approvedById?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Subscription {
+  id: string
+  userId: string
+  plan: 'MONTHLY' | 'ANNUAL'
+  startDate: string
+  endDate: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface PendingPaymentsResponse {
+  payments: Payment[]
+}
+
+export interface ExternalSubscription {
+  id: string
+  userId: string
+  user: {
+    id: string
+    username: string
+    phone: string
+    email: string | null
+    isPremium: boolean
+    role: 'USER' | 'ADMIN'
+  }
+  name: string
+  amount: number
+  startDate: string
+  billingCycle: 'MONTHLY' | 'QUARTERLY' | 'ANNUAL' | 'CUSTOM'
+  customDays: number | null
+  nextBillingDate: string
+  categoryId: string | null
+  category: {
+    id: string
+    name: string
+    type: 'INCOME' | 'EXPENSE'
+  } | null
+  notes: string | null
+  isActive: boolean
+  expirationStatus: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ExternalSubscriptionsResponse {
+  subscriptions: ExternalSubscription[]
+  pagination: Pagination
+}
+
 /**
  * Client API Admin
  */
@@ -210,6 +283,37 @@ export const adminApi = {
    * Authentification
    */
   auth: {
+    /**
+     * Vérifie la validité du token admin
+     */
+    verify: async (): Promise<ApiResponse<{ user: User }>> => {
+      try {
+        const response = await fetchWithAuth('/api/admin/auth/verify')
+
+        if (!response.ok) {
+          let errorMessage = 'Session invalide'
+          try {
+            const errorData = await response.json()
+            errorMessage = errorData.message || errorData.error || errorMessage
+          } catch {
+            errorMessage = `Erreur ${response.status}: ${response.statusText}`
+          }
+          return {
+            success: false,
+            message: errorMessage,
+          }
+        }
+
+        const data = await response.json()
+        return data
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue'
+        return {
+          success: false,
+          message: errorMessage,
+        }
+      }
+    },
     /**
      * Connexion avec email et mot de passe
      */
@@ -921,5 +1025,191 @@ export const adminApi = {
       }
     },
   },
-}
 
+  /**
+   * API Paiements Premium
+   */
+  payments: {
+    /**
+     * Récupère la liste des paiements en attente de vérification
+     */
+    getPending: async (): Promise<ApiResponse<PendingPaymentsResponse>> => {
+      try {
+        const response = await fetchWithAuth('/api/admin/payments/pending')
+        const result = await response.json()
+
+        if (!response.ok) {
+          return {
+            success: false,
+            message: result.message || result.error || `Erreur ${response.status}: ${response.statusText}`,
+            error: result.error,
+          }
+        }
+        return result
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue'
+        return {
+          success: false,
+          message: errorMessage,
+        }
+      }
+    },
+
+    /**
+     * Approuve un paiement en attente
+     * - Statut passe à APPROVED
+     * - Crée/renouvelle l'abonnement premium
+     * - Envoie notification push au client
+     */
+    approve: async (paymentId: string, customPlan?: 'MONTHLY' | 'ANNUAL'): Promise<ApiResponse<{ payment: Payment; subscription: Subscription }>> => {
+      try {
+        const body = customPlan ? { plan: customPlan } : {}
+        
+        const response = await fetchWithAuth(`/api/admin/payments/${paymentId}/approve`, {
+          method: 'POST',
+          body: Object.keys(body).length > 0 ? JSON.stringify(body) : undefined,
+        })
+
+        const result = await response.json()
+
+        if (!response.ok) {
+          return {
+            success: false,
+            message: result.message || result.error || `Erreur ${response.status}: ${response.statusText}`,
+            error: result.error,
+          }
+        }
+        return result
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue'
+        return {
+          success: false,
+          message: errorMessage,
+        }
+      }
+    },
+
+    /**
+     * Rejette un paiement en attente
+     * - Statut passe à REJECTED
+     * - Raison de rejet sauvegardée
+     * - Envoie notification push au client avec la raison
+     * - Client peut créer un nouveau paiement
+     */
+    reject: async (paymentId: string, reason: string): Promise<ApiResponse<{ payment: Payment }>> => {
+      try {
+        const response = await fetchWithAuth(`/api/admin/payments/${paymentId}/reject`, {
+          method: 'POST',
+          body: JSON.stringify({ reason }),
+        })
+
+        const result = await response.json()
+
+        if (!response.ok) {
+          return {
+            success: false,
+            message: result.message || result.error || `Erreur ${response.status}: ${response.statusText}`,
+            error: result.error,
+          }
+        }
+        return result
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue'
+        return {
+          success: false,
+          message: errorMessage,
+        }
+      }
+    },
+
+    /**
+     * Récupère tous les paiements avec filtres optionnels
+     * - Permet d'afficher l'historique complet (PENDING, APPROVED, REJECTED)
+     * - Supporte les filtres par statut, date, montant, utilisateur
+     */
+    getAll: async (params?: {
+      status?: 'PENDING_VERIFICATION' | 'APPROVED' | 'REJECTED'
+      startDate?: string
+      endDate?: string
+      minAmount?: number
+      maxAmount?: number
+      search?: string
+    }): Promise<ApiResponse<PendingPaymentsResponse>> => {
+      try {
+        const queryParams = new URLSearchParams()
+        if (params) {
+          Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              queryParams.append(key, String(value))
+            }
+          })
+        }
+        const query = queryParams.toString()
+        const response = await fetchWithAuth(`/api/admin/payments?${query}`)
+        const result = await response.json()
+
+        if (!response.ok) {
+          return {
+            success: false,
+            message: result.message || result.error || `Erreur ${response.status}: ${response.statusText}`,
+            error: result.error,
+          }
+        }
+        return result
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue'
+        return {
+          success: false,
+          message: errorMessage,
+        }
+      }
+    },
+  },
+
+  /**
+   * Gestion des abonnements externes
+   */
+  externalSubscriptions: {
+    /**
+     * Récupère tous les abonnements externes de tous les utilisateurs
+     */
+    getAll: async (params?: {
+      page?: number
+      limit?: number
+      search?: string
+      isActive?: boolean
+      billingCycle?: 'MONTHLY' | 'QUARTERLY' | 'ANNUAL' | 'CUSTOM'
+      minAmount?: number
+      maxAmount?: number
+    }): Promise<ApiResponse<ExternalSubscriptionsResponse>> => {
+      try {
+        const queryParams = new URLSearchParams()
+        if (params) {
+          Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              queryParams.append(key, String(value))
+            }
+          })
+        }
+        const query = queryParams.toString()
+        const response = await fetchWithAuth(`/api/admin/external-subscriptions?${query}`)
+        const result = await response.json()
+
+        if (!response.ok) {
+          return {
+            success: false,
+            message: result.message || result.error || `Erreur ${response.status}: ${response.statusText}`,
+            error: result.error,
+          }
+        }
+        return result
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue'
+        return {
+          success: false,
+          message: errorMessage,
+        }
+      }
+    },
+  }
+}

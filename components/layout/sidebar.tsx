@@ -14,13 +14,16 @@ import {
   LogOut,
   Loader2,
   Star,
+  CreditCard,
+  History,
+  Repeat,
 } from "lucide-react"
 import { useAuthStore } from "@/store/auth-store"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useDiscussionsCount } from "@/hooks/use-discussions-count"
-
+import { usePendingPaymentsCount } from "@/hooks/use-pending-payments-count"
 /**
  * Items de navigation pour la sidebar
  */
@@ -51,6 +54,21 @@ const navItems = [
     icon: MessageCircle,
   },
   {
+    title: "Paiements",
+    href: "/payments",
+    icon: CreditCard,
+  },
+  {
+    title: "Historique Premium",
+    href: "/payments-history",
+    icon: History,
+  },
+  {
+    title: "Abonnements Externes",
+    href: "/external-subscriptions",
+    icon: Repeat,
+  },
+  {
     title: "Statistiques",
     href: "/stats",
     icon: BarChart3,
@@ -70,6 +88,7 @@ export function Sidebar() {
   const router = useRouter()
   const { logout, user } = useAuthStore()
   const discussionsCount = useDiscussionsCount()
+  const pendingPaymentsCount = usePendingPaymentsCount()
   const [loadingPath, setLoadingPath] = useState<string | null>(null)
 
   // Réinitialiser le chargement quand le pathname change (navigation terminée)
@@ -106,6 +125,7 @@ export function Sidebar() {
           const isActive = pathname === item.href
           const isLoading = loadingPath === item.href
           const showBadge = item.href === "/support" && discussionsCount > 0
+          const showPaymentsBadge = item.href === "/payments" && pendingPaymentsCount > 0
 
           return (
             <Link
@@ -132,6 +152,14 @@ export function Sidebar() {
                   className="h-5 min-w-5 rounded-full px-1.5 flex items-center justify-center text-xs"
                 >
                   {discussionsCount > 99 ? "99+" : discussionsCount}
+                </Badge>
+              )}
+              {showPaymentsBadge && (
+                <Badge
+                  variant="default"
+                  className="h-5 min-w-5 rounded-full px-1.5 flex items-center justify-center text-xs bg-orange-500"
+                >
+                  {pendingPaymentsCount > 99 ? "99+" : pendingPaymentsCount}
                 </Badge>
               )}
             </Link>

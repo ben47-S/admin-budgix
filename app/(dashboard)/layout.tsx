@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/auth-store"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Header } from "@/components/layout/header"
 import { PageLoader } from "@/components/layout/page-loader"
+import { adminApi, getToken } from "@/lib/api"
 
 /**
  * Layout pour les pages du dashboard admin
@@ -17,27 +18,64 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const router = useRouter()
-  const { isAuthenticated, user, _hasHydrated } = useAuthStore()
+  const { isAuthenticated, user, logout, setUser } = useAuthStore()
   const [isChecking, setIsChecking] = useState(true)
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Attendre que le composant soit monté côté client
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   useEffect(() => {
-    // Attendre que le store soit hydraté avant de vérifier l'auth
-    if (!_hasHydrated) {
-      return
+    if (!isMounted) return
+
+    // Vérifier s'il y a un token dans le localStorage
+    const token = getToken()
+    let isCancelled = false
+
+    // Petit délai pour laisser le store se rehydrater
+    const timer = setTimeout(() => {
+      if (!token || !isAuthenticated || !user || user.role !== "ADMIN") {
+        router.push("/login")
+        return
+      }
+
+      const verifySession = async () => {
+        try {
+          const response = await adminApi.auth.verify()
+
+          if (isCancelled) return
+
+          if (!response.success) {
+            logout()
+            router.push("/login")
+            return
+          }
+
+          if (response.data?.user) {
+            setUser(response.data.user)
+          }
+
+          setIsChecking(false)
+        } catch {
+          if (isCancelled) return
+          logout()
+          router.push("/login")
+        }
+      }
+
+      verifySession()
+    }, 100)
+
+    return () => {
+      isCancelled = true
+      clearTimeout(timer)
     }
+  }, [isMounted, isAuthenticated, user, router, logout, setUser])
 
-    // Vérifier l'authentification au chargement
-    if (!isAuthenticated || !user || user.role !== "ADMIN") {
-      router.push("/login")
-      return
-    }
-
-    // Si authentifié, on peut afficher le dashboard
-    setIsChecking(false)
-  }, [isAuthenticated, user, _hasHydrated, router])
-
-  // Afficher un loader pendant l'hydratation ou la vérification
-  if (!_hasHydrated || isChecking) {
+  // Afficher un loader pendant la vérification initiale
+  if (!isMounted || isChecking) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
@@ -47,7 +85,7 @@ export default function DashboardLayout({
     )
   }
 
-  // Si non authentifié après hydratation, ne rien afficher (redirection en cours)
+  // Si non authentifié, ne rien afficher (redirection en cours)
   if (!isAuthenticated || !user || user.role !== "ADMIN") {
     return (
       <div className="flex min-h-screen items-center justify-center">
