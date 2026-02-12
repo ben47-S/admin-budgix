@@ -9,38 +9,18 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Formate un nombre en devise (FCFA)
+ * Exporter les fonctions de date depuis lib/date.ts
+ * Format unifié : ISO 8601 pour API, jj/mm/aaaa pour affichage
  */
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'XOF',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
-
-/**
- * Formate une date
- */
-export function formatDate(date: string | Date): string {
-  return new Intl.DateTimeFormat('fr-FR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }).format(new Date(date))
-}
-
-/**
- * Formate une date avec l'heure
- */
-export function formatDateTime(date: string | Date): string {
-  return new Intl.DateTimeFormat('fr-FR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(date))
-}
+export {
+  parseISODate,
+  formatDate,
+  formatDateLong,
+  formatDateWithFirst,
+  formatDateTime,
+  formatTime,
+  formatRelativeTime,
+  formatDateISO,
+  formatCurrency,
+} from "./date";
 

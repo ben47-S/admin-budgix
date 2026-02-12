@@ -30,9 +30,8 @@ import {
   RefreshCw,
   Loader2,
 } from "lucide-react"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
 import { adminApi, type Log, type LogLevel, type LogScope } from "@/lib/api"
+import { formatDateTime } from "@/lib/utils"
 
 const scopes: LogScope[] = ["USER", "BUSINESS", "SECURITY", "ADMIN", "SYSTEM"]
 const levels: LogLevel[] = ["INFO", "WARN", "ERROR"]
@@ -381,9 +380,7 @@ export default function LogsPage() {
                   logs.map((log: Log) => (
                     <TableRow key={log.id} className="font-mono text-xs">
                       <TableCell className="whitespace-nowrap">
-                        {format(new Date(log.createdAt), "dd/MM/yy HH:mm", {
-                          locale: fr,
-                        })}
+                        {formatDateTime(log.createdAt)}
                       </TableCell>
                       <TableCell>
                         <Badge variant={getLevelVariant(log.level)} className="flex items-center gap-1 w-fit text-xs">

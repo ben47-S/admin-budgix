@@ -88,7 +88,7 @@ export interface User {
   email: string | null
   isPremium: boolean
   role: 'USER' | 'ADMIN'
-  createdAt: string
+  createdAt: string // ISO 8601
   _count?: {
     transactions: number
     budgets: number
@@ -100,7 +100,7 @@ export interface User {
   subscription?: {
     plan: string
     price: number
-    startDate: string
+    startDate: string // ISO 8601
     endDate: string | null
   }
   stats?: {
@@ -161,7 +161,7 @@ export interface Review {
   rating: number
   comment: string | null
   createdAt: string
-  updatedAt: string
+  updatedAt: string // ISO 8601
   user: {
     id: string
     username: string | null
@@ -187,7 +187,7 @@ export interface ImprovementSuggestion {
   userId: string
   content: string
   createdAt: string
-  updatedAt: string
+  updatedAt: string // ISO 8601
   user: {
     id: string
     username: string | null
@@ -216,24 +216,24 @@ export interface Payment {
   status: 'PENDING_VERIFICATION' | 'APPROVED' | 'REJECTED'
   waveTransactionId: string
   senderName: string
-  transferDate: string
+  transferDate: string // ISO 8601
   rejectionReason?: string | null
   rejectedAt?: string | null
   rejectedById?: string | null
   approvedAt?: string | null
   approvedById?: string | null
   createdAt: string
-  updatedAt: string
+  updatedAt: string // ISO 8601
 }
 
 export interface Subscription {
   id: string
   userId: string
   plan: 'MONTHLY' | 'ANNUAL'
-  startDate: string
+  startDate: string // ISO 8601
   endDate: string | null
   createdAt: string
-  updatedAt: string
+  updatedAt: string // ISO 8601
 }
 
 export interface PendingPaymentsResponse {
@@ -253,7 +253,7 @@ export interface ExternalSubscription {
   }
   name: string
   amount: number
-  startDate: string
+  startDate: string // ISO 8601
   billingCycle: 'MONTHLY' | 'QUARTERLY' | 'ANNUAL' | 'CUSTOM'
   customDays: number | null
   nextBillingDate: string
@@ -267,7 +267,7 @@ export interface ExternalSubscription {
   isActive: boolean
   expirationStatus: string | null
   createdAt: string
-  updatedAt: string
+  updatedAt: string // ISO 8601
 }
 
 export interface ExternalSubscriptionsResponse {
@@ -650,9 +650,9 @@ export const adminApi = {
       id: string
       userId: string
       status: "OPEN" | "CLOSED" | "ARCHIVED"
-      lastActivityAt: string
+      lastActivityAt: string // ISO 8601
       createdAt: string
-      updatedAt: string
+      updatedAt: string // ISO 8601
       user: {
         id: string
         username: string | null
@@ -699,9 +699,9 @@ export const adminApi = {
       id: string
       userId: string
       status: "OPEN" | "CLOSED" | "ARCHIVED"
-      lastActivityAt: string
+      lastActivityAt: string // ISO 8601
       createdAt: string
-      updatedAt: string
+      updatedAt: string // ISO 8601
       user: {
         id: string
         username: string | null
@@ -716,7 +716,7 @@ export const adminApi = {
         content: string
         read: boolean
         createdAt: string
-        updatedAt: string
+        updatedAt: string // ISO 8601
       }>
     }>> => {
       try {
@@ -754,7 +754,7 @@ export const adminApi = {
       content: string
       read: boolean
       createdAt: string
-      updatedAt: string
+      updatedAt: string // ISO 8601
       discussion: {
         id: string
         userId: string

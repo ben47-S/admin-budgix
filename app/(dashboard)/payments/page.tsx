@@ -12,22 +12,9 @@ import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
 import { Download, Filter, Copy, Check } from 'lucide-react'
+import { parseISODate } from '@/lib/utils'
 
 type PaymentStatus = 'PENDING_VERIFICATION' | 'APPROVED' | 'REJECTED'
-
-// Fonction pour parser le format jj/mm/aaaa ou jj-mm-aaaa en Date
-const parseDate = (dateString: string): Date => {
-  const parts = dateString.split(/[\/-]/)
-  if (parts.length !== 3) {
-    throw new Error(`Format de date invalide: ${dateString}`)
-  }
-  const [day, month, year] = parts.map(Number)
-  const date = new Date(year, month - 1, day)
-  if (isNaN(date.getTime())) {
-    throw new Error(`Date invalide: ${dateString}`)
-  }
-  return date
-}
 
 export default function PaymentsPage() {
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null)
@@ -197,7 +184,7 @@ export default function PaymentsPage() {
       payment.status,
       payment.waveTransactionId,
       payment.senderName,
-      format(parseDate(payment.transferDate), 'dd MMMM yyyy', { locale: fr }),
+      format(parseISODate(payment.transferDate), 'dd MMMM yyyy', { locale: fr }),
       format(new Date(payment.createdAt), 'dd MMMM yyyy', { locale: fr }),
       payment.approvedAt
         ? format(new Date(payment.approvedAt), 'dd MMMM yyyy', { locale: fr })
@@ -425,7 +412,7 @@ export default function PaymentsPage() {
                       <span className="font-medium">{payment.senderName}</span>
                     </div>
                     <p className="text-gray-600 text-xs">
-                      Transfert le {format(parseDate(payment.transferDate), 'dd MMMM yyyy', {
+                      Transfert le {format(parseISODate(payment.transferDate), 'dd MMMM yyyy', {
                         locale: fr,
                       })}
                     </p>
