@@ -17,6 +17,7 @@ import {
   CreditCard,
   History,
   Repeat,
+  Activity,
 } from "lucide-react"
 import { useAuthStore } from "@/store/auth-store"
 import { useRouter } from "next/navigation"
@@ -72,6 +73,11 @@ const navItems = [
     title: "Statistiques",
     href: "/stats",
     icon: BarChart3,
+  },
+  {
+    title: "Logs Systèmes",
+    href: "/logs",
+    icon: Activity,
   },
   {
     title: "Avis et Suggestions",

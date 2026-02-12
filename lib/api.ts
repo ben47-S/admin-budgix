@@ -275,6 +275,30 @@ export interface ExternalSubscriptionsResponse {
   pagination: Pagination
 }
 
+// Types pour les Logs
+export type LogLevel = "INFO" | "WARN" | "ERROR"
+export type LogScope = "USER" | "BUSINESS" | "SECURITY" | "ADMIN" | "SYSTEM"
+
+export interface Log {
+  id: string
+  level: LogLevel
+  scope: LogScope
+  action: string
+  userId: string | null
+  adminId: string | null
+  targetId: string | null
+  metadata: Record<string, any> | null
+  createdAt: string
+}
+
+export interface LogsResponse {
+  logs: Log[]
+  pagination: Pagination
+}
+
+// Ré-exporter les types pour les rendre accessibles
+export type { LogLevel as LogLevelType, LogScope as LogScopeType }
+
 /**
  * Client API Admin
  */
@@ -1193,6 +1217,59 @@ export const adminApi = {
         }
         const query = queryParams.toString()
         const response = await fetchWithAuth(`/api/admin/external-subscriptions?${query}`)
+        const result = await response.json()
+
+        if (!response.ok) {
+          return {
+            success: false,
+            message: result.message || result.error || `Erreur ${response.status}: ${response.statusText}`,
+            error: result.error,
+          }
+        }
+        return result
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue'
+        return {
+          success: false,
+          message: errorMessage,
+        }
+      }
+    },
+  },
+
+  /**
+   * Logs systèmes et audit
+   */
+  logs: {
+    /**
+     * Récupère les logs systèmes avec filtres et pagination
+     */
+    getAll: async (params?: {
+      page?: number
+      limit?: number
+      scopes?: LogScope[]
+      levels?: LogLevel[]
+      action?: string
+      dateFrom?: string
+      dateTo?: string
+      actorType?: 'USER' | 'ADMIN'
+      searchId?: string
+    }): Promise<ApiResponse<LogsResponse>> => {
+      try {
+        const queryParams = new URLSearchParams()
+        if (params) {
+          Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              if (Array.isArray(value)) {
+                value.forEach((v) => queryParams.append(key, String(v)))
+              } else {
+                queryParams.append(key, String(value))
+              }
+            }
+          })
+        }
+        const query = queryParams.toString()
+        const response = await fetchWithAuth(`/api/admin/logs?${query}`)
         const result = await response.json()
 
         if (!response.ok) {
