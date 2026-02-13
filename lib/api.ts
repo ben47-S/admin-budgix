@@ -215,7 +215,6 @@ export interface Payment {
   amount: number
   status: 'PENDING_VERIFICATION' | 'APPROVED' | 'REJECTED'
   waveTransactionId: string
-  senderName: string
   transferDate: string // ISO 8601
   rejectionReason?: string | null
   rejectedAt?: string | null

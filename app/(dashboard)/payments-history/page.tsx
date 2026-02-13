@@ -101,7 +101,6 @@ export default function PaymentsHistoryPage() {
       'Montant (XOF)',
       'Statut',
       'ID Transaction Wave',
-      'Expéditeur',
       'Date Transfert',
       'Créé le',
       'Approuvé le',
@@ -118,7 +117,6 @@ export default function PaymentsHistoryPage() {
       payment.amount,
       payment.status,
       payment.waveTransactionId,
-      payment.senderName,
       format(new Date(payment.transferDate), 'dd MMMM yyyy', { locale: fr }),
       format(new Date(payment.createdAt), 'dd MMMM yyyy', { locale: fr }),
       payment.approvedAt
@@ -346,10 +344,6 @@ export default function PaymentsHistoryPage() {
                                 <Copy className="w-3 h-3 text-gray-400" />
                               )}
                             </Button>
-                          </div>
-                          <div className="text-xs">
-                            <span className="text-gray-600">Expéditeur: </span>
-                            <span className="font-medium">{payment.senderName}</span>
                           </div>
                           <p className="text-gray-600 text-xs">
                             Transfert le {format(new Date(payment.transferDate), 'dd MMMM yyyy', {
