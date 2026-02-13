@@ -26,6 +26,11 @@ export default function PaymentsPage() {
   const [isRejecting, setIsRejecting] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
+  // États pour les messages d'approbation et de rejet
+  const [approvalMessage, setApprovalMessage] = useState('Votre paiement a été approuvé')
+  const [isApprovalCustom, setIsApprovalCustom] = useState(false)
+  const [isRejectionCustom, setIsRejectionCustom] = useState(false)
+
   // États pour les filtres
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedPlan, setSelectedPlan] = useState<'ALL' | 'MONTHLY' | 'ANNUAL'>('ALL')
@@ -90,16 +95,52 @@ export default function PaymentsPage() {
     refetchInterval: 5000, // Auto-refresh
   })
 
-  // Approuver un paiement avec plan optionnel
+  // Initialiser le message de rejet avec la valeur par défaut quand le dialog s'ouvre
+  useEffect(() => {
+    if (isRejectDialogOpen && !isRejectionCustom) {
+      setRejectReason("Vérifier l'identifiant ou la date du transfert")
+    }
+  }, [isRejectDialogOpen, isRejectionCustom])
+
+  // Réinitialiser les états quand les dialogs se ferment
+  useEffect(() => {
+    if (!isRejectDialogOpen) {
+      setIsRejectionCustom(false)
+    }
+  }, [isRejectDialogOpen])
+
+  useEffect(() => {
+    if (!isApproveDialogOpen) {
+      setIsApprovalCustom(false)
+      setApprovalMessage('Votre paiement a été approuvé')
+    }
+  }, [isApproveDialogOpen])
+
+  // Gérer le bouton "Personnaliser" pour le rejet
+  const handleCustomizeReject = () => {
+    setIsRejectionCustom(true)
+    setRejectReason('')
+  }
+
+  // Gérer le bouton "Personnaliser" pour l'approbation
+  const handleCustomizeApproval = () => {
+    setIsApprovalCustom(true)
+    setApprovalMessage('')
+  }
+
+  // Approuver un paiement avec plan et message optionnels
   const handleApprove = async (paymentId: string, customPlan?: 'MONTHLY' | 'ANNUAL') => {
     setIsApproving(true)
     try {
-      const response = await adminApi.payments.approve(paymentId, customPlan)
+      const message = approvalMessage.trim() || undefined
+      const response = await adminApi.payments.approve(paymentId, customPlan, message)
       if (response.success) {
         setSelectedPayment(null)
         setIsApproveDialogOpen(false)
         setCustomApprovalPlan(null)
-        
+        setApprovalMessage('Votre paiement a été approuvé')
+        setIsApprovalCustom(false)
+
         // Attendre un peu avant de refetch pour éviter les blocages
         setTimeout(() => {
           refetch()
@@ -498,16 +539,33 @@ export default function PaymentsPage() {
             </p>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium">
-                Raison du rejet
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium">
+                  Raison du rejet
+                </label>
+                {!isRejectionCustom && (
+                  <Button
+                    onClick={handleCustomizeReject}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-7"
+                  >
+                    Personnaliser
+                  </Button>
+                )}
+              </div>
               <Textarea
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
-                placeholder="Ex: Montant incorrect, Expéditeur inconnu, Transaction non trouvée..."
+                placeholder={isRejectionCustom ? "Entrez un message personnalisé..." : "Message par défaut"}
                 className="w-full"
                 rows={4}
               />
+              {!isRejectionCustom && (
+                <p className="text-xs text-gray-500">
+                  Message par défaut : "Vérifier l'identifiant ou la date du transfert"
+                </p>
+              )}
             </div>
 
             <div className="flex gap-3 justify-end">
@@ -593,6 +651,36 @@ export default function PaymentsPage() {
 
             <div className="text-xs text-gray-500 bg-yellow-50 p-3 rounded">
               💡 Laissez vide pour utiliser le plan par défaut ({selectedPayment?.plan === 'MONTHLY' ? 'Mensuel' : 'Annuel'})
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium">
+                  Message de notification
+                </label>
+                {!isApprovalCustom && (
+                  <Button
+                    onClick={handleCustomizeApproval}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-7"
+                  >
+                    Personnaliser
+                  </Button>
+                )}
+              </div>
+              <Textarea
+                value={approvalMessage}
+                onChange={(e) => setApprovalMessage(e.target.value)}
+                placeholder={isApprovalCustom ? "Entrez un message personnalisé..." : "Message par défaut"}
+                className="w-full"
+                rows={3}
+              />
+              {!isApprovalCustom && (
+                <p className="text-xs text-gray-500">
+                  Message par défaut : "Votre paiement a été approuvé"
+                </p>
+              )}
             </div>
 
             <div className="flex gap-3 justify-end">

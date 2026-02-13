@@ -1084,10 +1084,12 @@ export const adminApi = {
      * - Crée/renouvelle l'abonnement premium
      * - Envoie notification push au client
      */
-    approve: async (paymentId: string, customPlan?: 'MONTHLY' | 'ANNUAL'): Promise<ApiResponse<{ payment: Payment; subscription: Subscription }>> => {
+    approve: async (paymentId: string, customPlan?: 'MONTHLY' | 'ANNUAL', customMessage?: string): Promise<ApiResponse<{ payment: Payment; subscription: Subscription }>> => {
       try {
-        const body = customPlan ? { plan: customPlan } : {}
-        
+        const body: { plan?: 'MONTHLY' | 'ANNUAL'; message?: string } = {}
+        if (customPlan) body.plan = customPlan
+        if (customMessage) body.message = customMessage
+
         const response = await fetchWithAuth(`/api/admin/payments/${paymentId}/approve`, {
           method: 'POST',
           body: Object.keys(body).length > 0 ? JSON.stringify(body) : undefined,
