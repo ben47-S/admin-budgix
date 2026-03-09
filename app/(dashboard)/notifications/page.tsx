@@ -7,7 +7,7 @@ import * as z from "zod"
 import { useMutation } from "@tanstack/react-query"
 import { adminApi } from "@/lib/api"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { LoadingButton } from "@/components/ui/loading-button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -34,6 +34,7 @@ type RecipientType = "all" | "phone" | "email" | "premium" | "standard"
 export default function NotificationsPage() {
   const [recipientType, setRecipientType] = useState<RecipientType>("all")
   const [recipientValue, setRecipientValue] = useState("")
+  const [phoneNumberLocal, setPhoneNumberLocal] = useState("")
   const [formError, setFormError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
@@ -49,6 +50,20 @@ export default function NotificationsPage() {
       body: "",
     },
   })
+
+  // Handler pour synchroniser le numéro de téléphone local avec recipientValue
+  const handlePhoneNumberChange = (localNumber: string) => {
+    setPhoneNumberLocal(localNumber)
+    setRecipientValue("+225" + localNumber)
+  }
+
+  // Handler pour changer le type de destinataire et réinitialiser les champs
+  const handleRecipientTypeChange = (newType: RecipientType) => {
+    setRecipientType(newType)
+    setRecipientValue("")
+    setPhoneNumberLocal("")
+    setFormError(null)
+  }
 
   const sendMutation = useMutation({
     mutationFn: async (data: {
@@ -143,6 +158,7 @@ export default function NotificationsPage() {
       setFormError(null)
       reset()
       setRecipientValue("")
+      setPhoneNumberLocal("")
       // Effacer le message de succès après 5 secondes
       setTimeout(() => setSuccessMessage(null), 5000)
     },
@@ -204,10 +220,7 @@ export default function NotificationsPage() {
                       ? "border-primary bg-primary text-primary-foreground shadow-md"
                       : "border-border hover:border-primary/50 hover:bg-accent"
                   }`}
-                  onClick={() => {
-                    setRecipientType("all")
-                    setRecipientValue("")
-                  }}
+                  onClick={() => handleRecipientTypeChange("all")}
                 >
                   <span className="text-sm font-medium">Tous les utilisateurs</span>
                 </button>
@@ -219,10 +232,7 @@ export default function NotificationsPage() {
                       ? "border-primary bg-primary text-primary-foreground shadow-md"
                       : "border-border hover:border-primary/50 hover:bg-accent"
                   }`}
-                  onClick={() => {
-                    setRecipientType("premium")
-                    setRecipientValue("")
-                  }}
+                  onClick={() => handleRecipientTypeChange("premium")}
                 >
                   <span className="text-sm font-medium">Utilisateurs Premium</span>
                 </button>
@@ -234,10 +244,7 @@ export default function NotificationsPage() {
                       ? "border-primary bg-primary text-primary-foreground shadow-md"
                       : "border-border hover:border-primary/50 hover:bg-accent"
                   }`}
-                  onClick={() => {
-                    setRecipientType("standard")
-                    setRecipientValue("")
-                  }}
+                  onClick={() => handleRecipientTypeChange("standard")}
                 >
                   <span className="text-sm font-medium">Utilisateurs Standard</span>
                 </button>
@@ -249,9 +256,7 @@ export default function NotificationsPage() {
                       ? "border-primary bg-primary text-primary-foreground shadow-md"
                       : "border-border hover:border-primary/50 hover:bg-accent"
                   }`}
-                  onClick={() => {
-                    setRecipientType("email")
-                  }}
+                  onClick={() => handleRecipientTypeChange("email")}
                 >
                   <span className="text-sm font-medium">Par Email</span>
                 </button>
@@ -263,32 +268,54 @@ export default function NotificationsPage() {
                       ? "border-primary bg-primary text-primary-foreground shadow-md"
                       : "border-border hover:border-primary/50 hover:bg-accent"
                   }`}
-                  onClick={() => {
-                    setRecipientType("phone")
-                  }}
+                  onClick={() => handleRecipientTypeChange("phone")}
                 >
                   <span className="text-sm font-medium">Par Téléphone</span>
                 </button>
               </div>
 
               {/* Champ pour email ou téléphone */}
-              {(recipientType === "email" || recipientType === "phone") && (
+              {recipientType === "email" && (
                 <div className="space-y-2">
-                  <Label htmlFor="recipient-value">
-                    {recipientType === "email" ? "Email de l'utilisateur" : "Numéro de téléphone"}
-                  </Label>
+                  <Label htmlFor="recipient-value">Email de l'utilisateur</Label>
                   <Input
                     id="recipient-value"
-                    type={recipientType === "email" ? "email" : "tel"}
-                    placeholder={
-                      recipientType === "email"
-                        ? "exemple@budgix.com"
-                        : "+2250123456789"
-                    }
+                    type="email"
+                    placeholder="exemple@budgix.com"
                     value={recipientValue}
                     onChange={(e) => setRecipientValue(e.target.value)}
                     disabled={sendMutation.isPending}
                   />
+                </div>
+              )}
+
+              {recipientType === "phone" && (
+                <div className="space-y-2">
+                  <Label htmlFor="phone-number">Numéro de téléphone</Label>
+                  <div className="flex gap-2">
+                    {/* Préfixe +225 (non-éditable) */}
+                    <Input
+                      type="text"
+                      value="+225"
+                      disabled
+                      className="w-20 text-center font-medium"
+                      readOnly
+                    />
+
+                    {/* Partie éditable du numéro */}
+                    <Input
+                      id="phone-number"
+                      type="tel"
+                      placeholder="0123456789"
+                      value={phoneNumberLocal}
+                      onChange={(e) => handlePhoneNumberChange(e.target.value)}
+                      disabled={sendMutation.isPending}
+                      className="flex-1"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Entrez le numéro sans le préfixe +225
+                  </p>
                 </div>
               )}
             </div>
@@ -340,9 +367,9 @@ export default function NotificationsPage() {
 
             {/* Bouton d'envoi */}
             <div className="flex justify-end">
-              <Button type="submit" disabled={sendMutation.isPending} size="lg">
-                {sendMutation.isPending ? "Envoi en cours..." : "Envoyer la notification"}
-              </Button>
+              <LoadingButton type="submit" isLoading={sendMutation.isPending} size="lg">
+                Envoyer la notification
+              </LoadingButton>
             </div>
           </form>
         </CardContent>

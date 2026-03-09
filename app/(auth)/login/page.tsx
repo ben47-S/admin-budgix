@@ -93,7 +93,8 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@budgix.com"
+                placeholder="email@example.com"
+                autoComplete="off"
                 {...register("email")}
                 disabled={isLoading}
               />
@@ -108,6 +109,7 @@ export default function LoginPage() {
                 id="password"
                 type="password"
                 placeholder="••••••••"
+                autoComplete="new-password"
                 {...register("password")}
                 disabled={isLoading}
               />

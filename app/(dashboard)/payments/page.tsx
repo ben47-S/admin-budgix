@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { adminApi, Payment } from '@/lib/api'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { LoadingButton } from '@/components/ui/loading-button'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
@@ -489,27 +490,29 @@ export default function PaymentsPage() {
                 <div className="flex flex-col gap-2 justify-center">
                   {payment.status === 'PENDING_VERIFICATION' ? (
                     <>
-                      <Button
+                      <LoadingButton
                         onClick={() => {
                           setSelectedPayment(payment)
                           setIsApproveDialogOpen(true)
                           setCustomApprovalPlan(null)
                         }}
-                        disabled={isApproving || isRejecting}
+                        isLoading={isApproving}
+                        disabled={isRejecting}
                         className="bg-green-600 hover:bg-green-700 text-white"
                       >
-                        {isApproving ? 'Approbation...' : 'Approuver'}
-                      </Button>
-                      <Button
+                        Approuver
+                      </LoadingButton>
+                      <LoadingButton
                         onClick={() => {
                           setSelectedPayment(payment)
                           setIsRejectDialogOpen(true)
                         }}
-                        disabled={isApproving || isRejecting}
+                        isLoading={isRejecting}
+                        disabled={isApproving}
                         variant="destructive"
                       >
                         Rejeter
-                      </Button>
+                      </LoadingButton>
                     </>
                   ) : (
                     <div className="text-xs text-gray-600 text-center py-2">
@@ -580,13 +583,14 @@ export default function PaymentsPage() {
               >
                 Annuler
               </Button>
-              <Button
+              <LoadingButton
                 onClick={handleReject}
-                disabled={isRejecting || !rejectReason.trim()}
+                isLoading={isRejecting}
+                disabled={!rejectReason.trim()}
                 variant="destructive"
               >
-                {isRejecting ? 'Rejet en cours...' : 'Confirmer le rejet'}
-              </Button>
+                Confirmer le rejet
+              </LoadingButton>
             </div>
           </Card>
         </div>
@@ -695,13 +699,13 @@ export default function PaymentsPage() {
               >
                 Annuler
               </Button>
-              <Button
+              <LoadingButton
                 onClick={() => handleApprove(selectedPayment!.id, customApprovalPlan || undefined)}
-                disabled={isApproving}
+                isLoading={isApproving}
                 className="bg-green-600 hover:bg-green-700 text-white"
               >
-                {isApproving ? 'Approbation...' : 'Approuver'}
-              </Button>
+                Approuver
+              </LoadingButton>
             </div>
           </Card>
         </div>

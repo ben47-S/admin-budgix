@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { LoadingButton } from "@/components/ui/loading-button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select } from "@/components/ui/select"
@@ -159,14 +160,10 @@ export default function LogsPage() {
             Journal d&apos;audit et événements système
           </p>
         </div>
-        <Button variant="outline" onClick={() => refetch()} disabled={isLoading}>
-          {isLoading ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <RefreshCw className="h-4 w-4 mr-2" />
-          )}
+        <LoadingButton variant="outline" onClick={() => refetch()} isLoading={isLoading}>
+          <RefreshCw className="h-4 w-4 mr-2" />
           Rafraîchir
-        </Button>
+        </LoadingButton>
       </div>
 
       {/* Card unique avec filtres et tableau */}
@@ -447,24 +444,26 @@ export default function LogsPage() {
                 Page {pagination.page} sur {pagination.totalPages} ({pagination.total} résultats)
               </p>
               <div className="flex gap-2">
-                <Button
+                <LoadingButton
                   variant="outline"
                   size="sm"
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1 || isLoading}
+                  disabled={currentPage === 1}
+                  isLoading={isLoading}
                 >
                   <ChevronLeft className="h-4 w-4 mr-1" />
                   Précédent
-                </Button>
-                <Button
+                </LoadingButton>
+                <LoadingButton
                   variant="outline"
                   size="sm"
                   onClick={() => setCurrentPage((p) => Math.min(pagination.totalPages, p + 1))}
-                  disabled={currentPage === pagination.totalPages || isLoading}
+                  disabled={currentPage === pagination.totalPages}
+                  isLoading={isLoading}
                 >
                   Suivant
                   <ChevronRight className="h-4 w-4 ml-1" />
-                </Button>
+                </LoadingButton>
               </div>
             </div>
           )}

@@ -66,14 +66,14 @@ export default function DashboardPage() {
       </div>
 
       {/* Statistiques utilisateurs */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Utilisateurs</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.users.total.toLocaleString()}</div>
+            <div className="text-xl sm:text-2xl font-bold">{data.users.total.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
               {data.users.newLast30Days} nouveaux ce mois
             </p>
@@ -86,7 +86,7 @@ export default function DashboardPage() {
             <UserCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.users.premium.toLocaleString()}</div>
+            <div className="text-xl sm:text-2xl font-bold">{data.users.premium.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
               {((data.users.premium / data.users.total) * 100).toFixed(1)}% du total
             </p>
@@ -99,7 +99,7 @@ export default function DashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.users.regular.toLocaleString()}</div>
+            <div className="text-xl sm:text-2xl font-bold">{data.users.regular.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">Utilisateurs non premium</p>
           </CardContent>
         </Card>
@@ -110,21 +110,21 @@ export default function DashboardPage() {
             <UserCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.users.admin.toLocaleString()}</div>
+            <div className="text-xl sm:text-2xl font-bold">{data.users.admin.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">Comptes administrateurs</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Statistiques transactions */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.transactions.total.toLocaleString()}</div>
+            <div className="text-xl sm:text-2xl font-bold">{data.transactions.total.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">Toutes transactions confondues</p>
           </CardContent>
         </Card>
@@ -135,7 +135,7 @@ export default function DashboardPage() {
             <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(data.transactions.totalAmount)}</div>
+            <div className="text-xl sm:text-2xl font-bold">{formatCurrency(data.transactions.totalAmount)}</div>
             <p className="text-xs text-muted-foreground">Montant total des transactions</p>
           </CardContent>
         </Card>
@@ -146,7 +146,7 @@ export default function DashboardPage() {
             <TrendingUp className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-destructive">
+            <div className="text-xl sm:text-2xl font-bold text-destructive">
               {formatCurrency(data.transactions.totalExpenses)}
             </div>
             <p className="text-xs text-muted-foreground">Dépenses totales</p>
@@ -159,7 +159,7 @@ export default function DashboardPage() {
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-xl sm:text-2xl font-bold text-green-600">
               {formatCurrency(data.transactions.totalIncome)}
             </div>
             <p className="text-xs text-muted-foreground">Revenus totaux</p>
@@ -168,14 +168,14 @@ export default function DashboardPage() {
       </div>
 
       {/* Statistiques fonctionnalités */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Budgets</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.features.budgets.toLocaleString()}</div>
+            <div className="text-xl sm:text-2xl font-bold">{data.features.budgets.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">Budgets créés</p>
           </CardContent>
         </Card>
@@ -186,7 +186,7 @@ export default function DashboardPage() {
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.features.debts.toLocaleString()}</div>
+            <div className="text-xl sm:text-2xl font-bold">{data.features.debts.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">Dettes enregistrées</p>
           </CardContent>
         </Card>
@@ -197,7 +197,7 @@ export default function DashboardPage() {
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-xl sm:text-2xl font-bold">
               {data.features.externalSubscriptions.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">Abonnements suivis</p>
@@ -210,7 +210,7 @@ export default function DashboardPage() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-xl sm:text-2xl font-bold">
               {data.features.globalCategories.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">Catégories disponibles</p>
@@ -225,7 +225,7 @@ export default function DashboardPage() {
           <CardDescription>Statistiques des abonnements premium</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{data.subscriptions.active.toLocaleString()}</div>
+          <div className="text-xl sm:text-2xl font-bold">{data.subscriptions.active.toLocaleString()}</div>
           <p className="text-xs text-muted-foreground">Abonnements premium actifs</p>
         </CardContent>
       </Card>

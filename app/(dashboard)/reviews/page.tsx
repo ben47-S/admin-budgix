@@ -6,6 +6,7 @@ import { adminApi, type Review, type ImprovementSuggestion } from "@/lib/api"
 import { formatDate } from "@/lib/utils"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { LoadingButton } from "@/components/ui/loading-button"
 import { Badge } from "@/components/ui/badge"
 import { Star, MessageSquare, Edit, Trash2, TrendingUp } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -28,6 +29,7 @@ export default function ReviewsPage() {
   const [activeTab, setActiveTab] = useState<"reviews" | "suggestions">("reviews")
   const [editingSuggestion, setEditingSuggestion] = useState<ImprovementSuggestion | null>(null)
   const [editContent, setEditContent] = useState("")
+  const [deletingSuggestionId, setDeletingSuggestionId] = useState<string | null>(null)
   const queryClient = useQueryClient()
 
   // Charger les statistiques des avis
@@ -106,6 +108,10 @@ export default function ReviewsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["suggestions-all"] })
       queryClient.invalidateQueries({ queryKey: ["suggestion-stats"] })
+      setDeletingSuggestionId(null)
+    },
+    onError: () => {
+      setDeletingSuggestionId(null)
     },
   })
 
@@ -125,6 +131,7 @@ export default function ReviewsPage() {
     if (!confirm("Êtes-vous sûr de vouloir supprimer cette suggestion ?")) {
       return
     }
+    setDeletingSuggestionId(id)
     deleteMutation.mutate(id)
   }
 
@@ -365,13 +372,14 @@ export default function ReviewsPage() {
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button
+                          <LoadingButton
                             variant="ghost"
                             size="icon"
+                            isLoading={deletingSuggestionId === suggestion.id}
                             onClick={() => handleDelete(suggestion.id)}
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                          </LoadingButton>
                         </div>
                       </div>
                     </div>
@@ -418,12 +426,13 @@ export default function ReviewsPage() {
             >
               Annuler
             </Button>
-            <Button
+            <LoadingButton
               onClick={handleUpdate}
-              disabled={!editContent.trim() || updateMutation.isPending}
+              disabled={!editContent.trim()}
+              isLoading={updateMutation.isPending}
             >
-              {updateMutation.isPending ? "Enregistrement..." : "Enregistrer"}
-            </Button>
+              Enregistrer
+            </LoadingButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>

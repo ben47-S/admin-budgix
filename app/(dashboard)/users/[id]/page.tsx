@@ -6,6 +6,7 @@ import { adminApi, type User } from "@/lib/api"
 import { formatDate, formatCurrency } from "@/lib/utils"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { LoadingButton } from "@/components/ui/loading-button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select } from "@/components/ui/select"
@@ -123,20 +124,20 @@ export default function UserDetailPage() {
               <Button variant="outline" onClick={handleEdit}>
                 Modifier
               </Button>
-              <Button variant="destructive" onClick={handleDelete}>
+              <LoadingButton variant="destructive" isLoading={deleteMutation.isPending} onClick={handleDelete}>
                 <Trash2 className="mr-2 h-4 w-4" />
                 Supprimer
-              </Button>
+              </LoadingButton>
             </>
           ) : (
             <>
               <Button variant="outline" onClick={() => setIsEditing(false)}>
                 Annuler
               </Button>
-              <Button onClick={handleSave} disabled={updateMutation.isPending}>
+              <LoadingButton onClick={handleSave} isLoading={updateMutation.isPending}>
                 <Save className="mr-2 h-4 w-4" />
-                {updateMutation.isPending ? "Enregistrement..." : "Enregistrer"}
-              </Button>
+                Enregistrer
+              </LoadingButton>
             </>
           )}
         </div>

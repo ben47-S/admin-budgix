@@ -7,6 +7,7 @@ import { adminApi, type ExternalSubscription } from '@/lib/api'
 import { formatDate, formatCurrency } from '@/lib/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { LoadingButton } from '@/components/ui/loading-button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select'
@@ -34,6 +35,7 @@ export default function ExternalSubscriptionsPage() {
   const [billingCycle, setBillingCycle] = useState<'MONTHLY' | 'QUARTERLY' | 'ANNUAL' | 'CUSTOM' | undefined>(undefined)
   const [minAmount, setMinAmount] = useState<number | undefined>(undefined)
   const [maxAmount, setMaxAmount] = useState<number | undefined>(undefined)
+  const [navigatingToUserId, setNavigatingToUserId] = useState<string | null>(null)
 
   // Charger les abonnements externes
   const { data, isLoading, error, refetch } = useQuery({
@@ -84,6 +86,7 @@ export default function ExternalSubscriptionsPage() {
   }
 
   const handleViewUser = (userId: string) => {
+    setNavigatingToUserId(userId)
     router.push(`/users/${userId}`)
   }
 
@@ -358,14 +361,15 @@ export default function ExternalSubscriptionsPage() {
                         </TableCell>
                         <TableCell>{getStatusBadge(subscription)}</TableCell>
                         <TableCell className="text-right">
-                          <Button
+                          <LoadingButton
                             variant="ghost"
                             size="icon"
                             onClick={() => handleViewUser(subscription.userId)}
+                            isLoading={navigatingToUserId === subscription.userId}
                             title="Voir l'utilisateur"
                           >
                             <Eye className="h-4 w-4" />
-                          </Button>
+                          </LoadingButton>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -380,22 +384,24 @@ export default function ExternalSubscriptionsPage() {
                     Page {data.pagination.page} sur {data.pagination.totalPages}
                   </p>
                   <div className="flex gap-2">
-                    <Button
+                    <LoadingButton
                       variant="outline"
                       size="sm"
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page === 1}
+                      isLoading={isLoading}
                     >
                       Précédent
-                    </Button>
-                    <Button
+                    </LoadingButton>
+                    <LoadingButton
                       variant="outline"
                       size="sm"
                       onClick={() => setPage((p) => Math.min(data.pagination.totalPages, p + 1))}
                       disabled={page === data.pagination.totalPages}
+                      isLoading={isLoading}
                     >
                       Suivant
-                    </Button>
+                    </LoadingButton>
                   </div>
                 </div>
               )}

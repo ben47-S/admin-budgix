@@ -9,6 +9,7 @@ import { adminApi, type Category } from "@/lib/api"
 import { formatDate } from "@/lib/utils"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { LoadingButton } from "@/components/ui/loading-button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select } from "@/components/ui/select"
@@ -21,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { ResponsiveTableWrapper } from "@/components/ui/responsive-table"
 import { Plus, Trash2, Edit } from "lucide-react"
 
 /**
@@ -45,6 +47,7 @@ export default function CategoriesPage() {
   const [isCreating, setIsCreating] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [typeFilter, setTypeFilter] = useState<"ALL" | "INCOME" | "EXPENSE">("ALL")
+  const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null)
 
   const {
     register,
@@ -123,6 +126,10 @@ export default function CategoriesPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-categories"] })
+      setDeletingCategoryId(null)
+    },
+    onError: () => {
+      setDeletingCategoryId(null)
     },
   })
 
@@ -147,6 +154,7 @@ export default function CategoriesPage() {
     if (!confirm("Êtes-vous sûr de vouloir supprimer cette catégorie ?")) {
       return
     }
+    setDeletingCategoryId(id)
     deleteMutation.mutate(id)
   }
 
@@ -230,18 +238,12 @@ export default function CategoriesPage() {
               )}
 
               <div className="flex gap-2">
-                <Button
+                <LoadingButton
                   type="submit"
-                  disabled={createMutation.isPending || updateMutation.isPending}
+                  isLoading={createMutation.isPending || updateMutation.isPending}
                 >
-                  {editingCategory
-                    ? updateMutation.isPending
-                      ? "Enregistrement..."
-                      : "Enregistrer"
-                    : createMutation.isPending
-                    ? "Création..."
-                    : "Créer"}
-                </Button>
+                  {editingCategory ? "Enregistrer" : "Créer"}
+                </LoadingButton>
                 <Button type="button" variant="outline" onClick={handleCancel}>
                   Annuler
                 </Button>
@@ -296,13 +298,13 @@ export default function CategoriesPage() {
               </p>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <ResponsiveTableWrapper>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Nom</TableHead>
                     <TableHead>Type</TableHead>
-                    <TableHead>Date de création</TableHead>
+                    <TableHead className="hidden sm:table-cell">Date de création</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -315,32 +317,34 @@ export default function CategoriesPage() {
                           {category.type === "INCOME" ? "Revenu" : "Dépense"}
                         </Badge>
                       </TableCell>
-                      <TableCell>{formatDate(category.createdAt)}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{formatDate(category.createdAt)}</TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
+                        <div className="flex justify-end gap-3 sm:gap-2">
                           <Button
                             variant="ghost"
                             size="icon"
+                            className="min-h-[44px] min-w-[44px]"
                             onClick={() => handleEdit(category)}
                             disabled={isCreating || editingCategory !== null}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button
+                          <LoadingButton
                             variant="ghost"
                             size="icon"
+                            className="min-h-[44px] min-w-[44px]"
+                            isLoading={deletingCategoryId === category.id}
                             onClick={() => handleDelete(category.id)}
-                            disabled={deleteMutation.isPending}
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                          </LoadingButton>
                         </div>
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-            </div>
+            </ResponsiveTableWrapper>
           )}
         </CardContent>
       </Card>

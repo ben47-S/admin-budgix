@@ -5,7 +5,7 @@ import { useDiscussions } from "@/hooks/use-discussions"
 import { formatDate } from "@/lib/utils"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { LoadingButton } from "@/components/ui/loading-button"
 import { Badge } from "@/components/ui/badge"
 import { Search, MessageCircle, Send, X, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -17,7 +17,10 @@ import type { Discussion, Message } from "@/lib/types/discussions"
 export default function SupportPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [messageInput, setMessageInput] = useState("")
+  const [isSending, setIsSending] = useState(false)
+  const [isClosing, setIsClosing] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
 
   const {
     isConnected,
@@ -58,20 +61,58 @@ export default function SupportPage() {
     }
   }, [currentDiscussionId, joinDiscussion, leaveDiscussion, markAsRead])
 
+  // Scroll vers le bas quand on ouvre une nouvelle discussion
+  useEffect(() => {
+    if (currentDiscussion && messagesContainerRef.current) {
+      // Attendre que le DOM soit mis à jour avant de scroller
+      setTimeout(() => {
+        if (messagesContainerRef.current) {
+          messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight
+        }
+      }, 100)
+    }
+  }, [currentDiscussionId])
+
   // Scroll vers le bas quand de nouveaux messages arrivent
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    if (messagesContainerRef.current && messagesEndRef.current) {
+      // Utiliser scrollTop sur le conteneur au lieu de scrollIntoView pour éviter le scroll de la page
+      const container = messagesContainerRef.current
+      const scrollHeight = container.scrollHeight
+      const clientHeight = container.clientHeight
+      
+      // Scroll uniquement si on est proche du bas (pour ne pas déranger si l'utilisateur scroll vers le haut)
+      const isNearBottom = scrollHeight - container.scrollTop - clientHeight < 100
+      const messagesCount = currentDiscussion?.messages?.length || 0
+      
+      if (isNearBottom || messagesCount === 0) {
+        // Utiliser requestAnimationFrame pour s'assurer que le DOM est mis à jour
+        requestAnimationFrame(() => {
+          container.scrollTop = container.scrollHeight
+        })
+      }
+    }
   }, [currentDiscussion?.messages])
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!currentDiscussionId || !messageInput.trim()) return
-    sendMessage(currentDiscussionId, messageInput)
-    setMessageInput("")
+    setIsSending(true)
+    try {
+      await sendMessage(currentDiscussionId, messageInput)
+      setMessageInput("")
+    } finally {
+      setIsSending(false)
+    }
   }
 
   const handleCloseDiscussion = async () => {
     if (!currentDiscussionId) return
-    await closeDiscussion(currentDiscussionId)
+    setIsClosing(true)
+    try {
+      await closeDiscussion(currentDiscussionId)
+    } finally {
+      setIsClosing(false)
+    }
   }
 
   const messages = currentDiscussion?.messages || []
@@ -221,21 +262,22 @@ export default function SupportPage() {
                     {currentDiscussion.status}
                   </Badge>
                   {currentDiscussion.status === "OPEN" && (
-                    <Button
+                    <LoadingButton
                       variant="outline"
                       size="sm"
                       onClick={handleCloseDiscussion}
+                      isLoading={isClosing}
                       className="gap-2"
                     >
                       <X className="h-4 w-4" />
                       Fermer
-                    </Button>
+                    </LoadingButton>
                   )}
                 </div>
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
                 {isLoadingDiscussion ? (
                   <div className="flex items-center justify-center h-full">
                     <p className="text-sm text-muted-foreground">Chargement des messages...</p>
@@ -299,10 +341,11 @@ export default function SupportPage() {
                       placeholder="Tapez votre message..."
                       className="flex-1"
                       maxLength={5000}
+                      disabled={isSending}
                     />
-                    <Button type="submit" size="icon" disabled={!messageInput.trim()}>
+                    <LoadingButton type="submit" size="icon" disabled={!messageInput.trim()} isLoading={isSending}>
                       <Send className="h-4 w-4" />
-                    </Button>
+                    </LoadingButton>
                   </form>
                 </div>
               )}
