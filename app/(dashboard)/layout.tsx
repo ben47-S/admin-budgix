@@ -97,15 +97,15 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Indicateur de chargement pendant la navigation */}
-      <PageLoader />
-      <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
-      </div>
-    </div>
+     <div className="flex h-screen overflow-hidden">
+       {/* Indicateur de chargement pendant la navigation */}
+       <PageLoader />
+       <Sidebar />
+       <div className="flex flex-1 flex-col">
+         <Header />
+         <main className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
+       </div>
+     </div>
   )
 }
 
