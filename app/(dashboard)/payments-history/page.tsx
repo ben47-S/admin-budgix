@@ -175,11 +175,11 @@ export default function PaymentsHistoryPage() {
   const payments = data || []
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-start">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Historique des Demandes Premium</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Historique des Demandes Premium</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">
             {payments.length} paiement{payments.length !== 1 ? 's' : ''} traité{payments.length !== 1 ? 's' : ''}
           </p>
         </div>
@@ -187,7 +187,7 @@ export default function PaymentsHistoryPage() {
           onClick={handleExportCSV}
           disabled={payments.length === 0}
           variant="outline"
-          className="gap-2"
+          className="gap-2 w-full sm:w-auto min-h-[44px]"
         >
           <Download className="w-4 h-4" />
           Exporter CSV
@@ -258,11 +258,11 @@ export default function PaymentsHistoryPage() {
                 {monthPayments.map((payment) => (
                   <Card
                     key={payment.id}
-                    className="p-6 hover:shadow-lg transition-shadow"
+                    className="p-4 sm:p-6 hover:shadow-lg transition-shadow"
                   >
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+                    <div className="flex flex-col gap-4 md:grid md:grid-cols-5 md:gap-6">
                       {/* Colonne 1: Utilisateur */}
-                      <div className="space-y-2">
+                      <div className="space-y-2 pb-3 border-b md:pb-0 md:border-b-0">
                         <h3 className="text-sm font-semibold text-gray-900">
                           Utilisateur
                         </h3>
@@ -276,7 +276,7 @@ export default function PaymentsHistoryPage() {
                       </div>
 
                       {/* Colonne 2: Paiement */}
-                      <div className="space-y-1">
+                      <div className="space-y-1 pb-3 border-b md:pb-0 md:border-b-0">
                         <h3 className="text-sm font-semibold text-gray-900">
                           Paiement
                         </h3>
@@ -321,7 +321,7 @@ export default function PaymentsHistoryPage() {
                       </div>
 
                       {/* Colonne 3: Infos Wave */}
-                      <div className="space-y-1">
+                      <div className="space-y-1 pb-3 border-b md:pb-0 md:border-b-0">
                         <h3 className="text-sm font-semibold text-gray-900">
                           Infos Wave
                         </h3>
@@ -354,7 +354,7 @@ export default function PaymentsHistoryPage() {
                       </div>
 
                       {/* Colonne 4: Statut et dates */}
-                      <div className="space-y-2">
+                      <div className="space-y-2 pb-3 border-b md:pb-0 md:border-b-0">
                         <h3 className="text-sm font-semibold text-gray-900">
                           Statut
                         </h3>
@@ -385,7 +385,7 @@ export default function PaymentsHistoryPage() {
                       </div>
 
                       {/* Colonne 5: Info */}
-                      <div className="flex flex-col gap-2 justify-center">
+                      <div className="flex flex-col gap-2 justify-center pt-2 md:pt-0">
                         <div className="text-xs text-gray-600 text-center py-2">
                           {payment.status === 'APPROVED' ? '✅ Traité' : '❌ Refusé'}
                         </div>

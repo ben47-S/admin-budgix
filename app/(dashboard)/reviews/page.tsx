@@ -152,10 +152,10 @@ export default function ReviewsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Avis et Suggestions</h1>
-        <p className="text-muted-foreground">Gérez les avis et suggestions des utilisateurs</p>
+        <h1 className="text-2xl sm:text-3xl font-bold">Avis et Suggestions</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">Gérez les avis et suggestions des utilisateurs</p>
       </div>
 
       {/* Onglets */}

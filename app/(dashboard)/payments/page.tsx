@@ -87,7 +87,12 @@ export default function PaymentsPage() {
       params.status = 'PENDING_VERIFICATION'
 
       const response = await adminApi.payments.getAll(params)
-      console.log('getAll response:', response)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('getAll response:', {
+          success: response.success,
+          count: response.data?.payments?.length || 0,
+        })
+      }
       if (!response.success) {
         throw new Error(response.message || 'Erreur lors du chargement')
       }
@@ -282,11 +287,11 @@ export default function PaymentsPage() {
   const payments = data || []
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-start">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Paiements Premium</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Paiements Premium</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">
             {payments.length} demande{payments.length !== 1 ? 's' : ''} en attente de validation
           </p>
         </div>
@@ -294,7 +299,7 @@ export default function PaymentsPage() {
           onClick={handleExportCSV}
           disabled={payments.length === 0}
           variant="outline"
-          className="gap-2"
+          className="gap-2 w-full sm:w-auto min-h-[44px]"
         >
           <Download className="w-4 h-4" />
           Exporter CSV
@@ -360,11 +365,11 @@ export default function PaymentsPage() {
                 {monthPayments.map((payment) => (
             <Card
               key={payment.id}
-              className="p-6 hover:shadow-lg transition-shadow"
+              className="p-4 sm:p-6 hover:shadow-lg transition-shadow"
             >
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+              <div className="flex flex-col gap-4 md:grid md:grid-cols-5 md:gap-6">
                 {/* Colonne 1: Utilisateur */}
-                <div className="space-y-2">
+                <div className="space-y-2 pb-3 border-b md:pb-0 md:border-b-0">
                   <h3 className="text-sm font-semibold text-gray-900">
                     Utilisateur
                   </h3>
@@ -378,7 +383,7 @@ export default function PaymentsPage() {
                 </div>
 
                 {/* Colonne 2: Paiement */}
-                <div className="space-y-1">
+                <div className="space-y-1 pb-3 border-b md:pb-0 md:border-b-0">
                   <h3 className="text-sm font-semibold text-gray-900">
                     Paiement
                   </h3>
@@ -421,7 +426,7 @@ export default function PaymentsPage() {
                 </div>
 
                 {/* Colonne 3: Infos Wave */}
-                <div className="space-y-1">
+                <div className="space-y-1 pb-3 border-b md:pb-0 md:border-b-0">
                   <h3 className="text-sm font-semibold text-gray-900">
                     Infos Wave
                   </h3>
@@ -456,7 +461,7 @@ export default function PaymentsPage() {
                 </div>
 
                 {/* Colonne 4: Statut et dates */}
-                <div className="space-y-2">
+                <div className="space-y-2 pb-3 border-b md:pb-0 md:border-b-0">
                   <h3 className="text-sm font-semibold text-gray-900">
                     Statut
                   </h3>
@@ -487,7 +492,7 @@ export default function PaymentsPage() {
                 </div>
 
                 {/* Colonne 5: Actions */}
-                <div className="flex flex-col gap-2 justify-center">
+                <div className="flex flex-col gap-2 justify-center pt-2 md:pt-0">
                   {payment.status === 'PENDING_VERIFICATION' ? (
                     <>
                       <LoadingButton
@@ -498,7 +503,7 @@ export default function PaymentsPage() {
                         }}
                         isLoading={isApproving}
                         disabled={isRejecting}
-                        className="bg-green-600 hover:bg-green-700 text-white"
+                        className="bg-green-600 hover:bg-green-700 text-white min-h-[44px]"
                       >
                         Approuver
                       </LoadingButton>
@@ -510,6 +515,7 @@ export default function PaymentsPage() {
                         isLoading={isRejecting}
                         disabled={isApproving}
                         variant="destructive"
+                        className="min-h-[44px]"
                       >
                         Rejeter
                       </LoadingButton>
@@ -531,8 +537,8 @@ export default function PaymentsPage() {
 
       {/* Dialog de rejet */}
       {isRejectDialogOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md p-6 space-y-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 space-y-4">
             <h2 className="text-xl font-bold">Rejeter le paiement</h2>
             <p className="text-sm text-gray-600">
               Utilisateur:{' '}
@@ -571,7 +577,7 @@ export default function PaymentsPage() {
               )}
             </div>
 
-            <div className="flex gap-3 justify-end">
+            <div className="flex flex-col sm:flex-row gap-3 justify-end">
               <Button
                 onClick={() => {
                   setIsRejectDialogOpen(false)
@@ -580,6 +586,7 @@ export default function PaymentsPage() {
                 }}
                 variant="outline"
                 disabled={isRejecting}
+                className="w-full sm:w-auto min-h-[44px]"
               >
                 Annuler
               </Button>
@@ -588,6 +595,7 @@ export default function PaymentsPage() {
                 isLoading={isRejecting}
                 disabled={!rejectReason.trim()}
                 variant="destructive"
+                className="w-full sm:w-auto min-h-[44px]"
               >
                 Confirmer le rejet
               </LoadingButton>
@@ -598,8 +606,8 @@ export default function PaymentsPage() {
 
       {/* Dialog d'approbation avec choix du plan */}
       {isApproveDialogOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md p-6 space-y-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 space-y-4">
             <h2 className="text-xl font-bold">Approuver le paiement</h2>
             <p className="text-sm text-gray-600">
               Utilisateur:{' '}
@@ -620,7 +628,7 @@ export default function PaymentsPage() {
                 S\u00e9lectionner un plan pour l&apos;abonnement
               </label>
               <div className="space-y-2">
-                <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-blue-50"
+                <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-blue-50 min-h-[56px] touch-manipulation"
                   style={{backgroundColor: customApprovalPlan === 'MONTHLY' ? '#eff6ff' : 'white', borderColor: customApprovalPlan === 'MONTHLY' ? '#3b82f6' : '#e5e7eb'}}>
                   <input
                     type="radio"
@@ -628,14 +636,14 @@ export default function PaymentsPage() {
                     value="MONTHLY"
                     checked={customApprovalPlan === 'MONTHLY'}
                     onChange={() => setCustomApprovalPlan('MONTHLY')}
-                    className="w-4 h-4"
+                    className="w-5 h-5"
                   />
                   <div>
                     <div className="font-medium">Abonnement Mensuel</div>
                     <div className="text-xs text-gray-600">Plan par mois</div>
                   </div>
                 </label>
-                <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-blue-50"
+                <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-blue-50 min-h-[56px] touch-manipulation"
                   style={{backgroundColor: customApprovalPlan === 'ANNUAL' ? '#eff6ff' : 'white', borderColor: customApprovalPlan === 'ANNUAL' ? '#3b82f6' : '#e5e7eb'}}>
                   <input
                     type="radio"

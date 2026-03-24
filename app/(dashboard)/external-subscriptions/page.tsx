@@ -116,10 +116,10 @@ export default function ExternalSubscriptionsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Abonnements Externes</h1>
-        <p className="text-muted-foreground">Gérez tous les abonnements externes des utilisateurs</p>
+        <h1 className="text-2xl sm:text-3xl font-bold">Abonnements Externes</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">Gérez tous les abonnements externes des utilisateurs</p>
       </div>
 
       {/* Statistiques */}

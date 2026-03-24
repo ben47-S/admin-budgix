@@ -150,10 +150,10 @@ export default function LogsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Activity className="h-8 w-8" />
+          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+            <Activity className="h-6 sm:h-8 w-6 sm:w-8" />
             Logs Systèmes
           </h1>
           <p className="text-muted-foreground mt-1">

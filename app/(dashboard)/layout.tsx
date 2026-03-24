@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/store/auth-store"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Header } from "@/components/layout/header"
+import { BottomNav } from "@/components/layout/bottom-nav"
 import { PageLoader } from "@/components/layout/page-loader"
 import { adminApi, getToken } from "@/lib/api"
 
@@ -97,15 +98,16 @@ export default function DashboardLayout({
   }
 
   return (
-     <div className="flex h-screen overflow-hidden">
-       {/* Indicateur de chargement pendant la navigation */}
-       <PageLoader />
-       <Sidebar />
-       <div className="flex flex-1 flex-col">
-         <Header />
-         <main className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
-       </div>
-     </div>
+      <div className="flex h-screen">
+        {/* Indicateur de chargement pendant la navigation */}
+        <PageLoader />
+        <Sidebar />
+        <div className="flex flex-1 flex-col">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-20 md:pb-4">{children}</main>
+        </div>
+        <BottomNav />
+      </div>
   )
 }
 

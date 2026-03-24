@@ -46,8 +46,8 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-[999] border-b bg-card">
-      <div className="flex h-16 items-center justify-between px-4 sm:px-6">
+    <header className="sticky top-0 z-40 border-b bg-card">
+      <div className="flex h-14 sm:h-16 items-center justify-between px-4 sm:px-6">
         {/* Bouton hamburger - visible uniquement sur mobile */}
         <Button
           variant="ghost"
@@ -58,7 +58,7 @@ export function Header() {
         >
           <Menu className="h-5 w-5" />
         </Button>
-        <h2 className="text-base sm:text-lg font-semibold">
+        <h2 className="text-sm sm:text-base md:text-lg font-semibold">
           {getPageTitle(pathname)}
         </h2>
         <div className="flex items-center gap-2 sm:gap-4">

@@ -3,11 +3,13 @@
 import { useState, useEffect, useRef } from "react"
 import { useDiscussions } from "@/hooks/use-discussions"
 import { formatDate } from "@/lib/utils"
+import { useMobile } from "@/hooks/use-mobile"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { LoadingButton } from "@/components/ui/loading-button"
 import { Badge } from "@/components/ui/badge"
-import { Search, MessageCircle, Send, X, AlertCircle } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Search, MessageCircle, Send, X, AlertCircle, ArrowLeft } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Discussion, Message } from "@/lib/types/discussions"
 
@@ -15,6 +17,8 @@ import type { Discussion, Message } from "@/lib/types/discussions"
  * Page de service client / Chat avec les utilisateurs
  */
 export default function SupportPage() {
+  const isMobile = useMobile()
+  const [mobileView, setMobileView] = useState<'list' | 'chat'>('list')
   const [searchQuery, setSearchQuery] = useState("")
   const [messageInput, setMessageInput] = useState("")
   const [isSending, setIsSending] = useState(false)
@@ -117,10 +121,29 @@ export default function SupportPage() {
 
   const messages = currentDiscussion?.messages || []
 
+  // Passer à la vue chat sur mobile quand une discussion est sélectionnée
+  useEffect(() => {
+    if (isMobile && currentDiscussionId) {
+      setMobileView('chat')
+    }
+  }, [isMobile, currentDiscussionId])
+
+  // Revenir à la liste sur mobile quand on quitte une discussion
+  const handleMobileBack = () => {
+    if (currentDiscussionId) {
+      leaveDiscussion(currentDiscussionId)
+    }
+    setMobileView('list')
+  }
+
   return (
     <div className="flex h-[calc(100vh-8rem)] gap-4">
-      {/* Liste des discussions */}
-      <Card className="w-80 flex-shrink-0 flex flex-col">
+      {/* Liste des discussions - Desktop: toujours visible, Mobile: seulement si mobileView === 'list' */}
+      <Card className={cn(
+        "w-80 flex-shrink-0 flex flex-col",
+        "md:flex", // Toujours flex sur desktop
+        isMobile && mobileView === 'chat' && "hidden" // Cacher sur mobile si vue chat
+      )}>
         <CardContent className="p-0 flex flex-col h-full">
           {/* Header avec recherche */}
           <div className="p-4 border-b">
@@ -183,7 +206,7 @@ export default function SupportPage() {
                         }
                       }}
                       className={cn(
-                        "w-full p-4 text-left hover:bg-accent transition-colors relative",
+                        "w-full p-4 text-left hover:bg-accent transition-colors relative min-h-[72px] touch-manipulation",
                         currentDiscussionId === discussion.id && "bg-accent"
                       )}
                     >
@@ -239,13 +262,28 @@ export default function SupportPage() {
         </CardContent>
       </Card>
 
-      {/* Zone de chat */}
-      <Card className="flex-1 flex flex-col">
+      {/* Zone de chat - Desktop: toujours visible, Mobile: seulement si mobileView === 'chat' */}
+      <Card className={cn(
+        "flex-1 flex flex-col",
+        "md:flex", // Toujours flex sur desktop
+        isMobile && mobileView === 'list' && "hidden" // Cacher sur mobile si vue liste
+      )}>
         <CardContent className="p-0 flex flex-col h-full">
           {currentDiscussion ? (
             <>
-              {/* Header de la discussion */}
-              <div className="p-4 border-b flex items-center justify-between">
+              {/* Header de la discussion avec bouton retour mobile */}
+              <div className="p-4 border-b flex items-center gap-3">
+                {isMobile && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleMobileBack}
+                    className="flex-shrink-0"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                )}
+                <div className="flex items-center justify-between flex-1">
                 <div className="flex-1">
                   <h3 className="font-semibold">
                     {currentDiscussion.user.username ||
@@ -273,6 +311,7 @@ export default function SupportPage() {
                       Fermer
                     </LoadingButton>
                   )}
+                </div>
                 </div>
               </div>
 
@@ -339,11 +378,11 @@ export default function SupportPage() {
                       value={messageInput}
                       onChange={(e) => setMessageInput(e.target.value)}
                       placeholder="Tapez votre message..."
-                      className="flex-1"
+                      className="flex-1 h-12"
                       maxLength={5000}
                       disabled={isSending}
                     />
-                    <LoadingButton type="submit" size="icon" disabled={!messageInput.trim()} isLoading={isSending}>
+                    <LoadingButton type="submit" size="icon" disabled={!messageInput.trim()} isLoading={isSending} className="h-12 w-12">
                       <Send className="h-4 w-4" />
                     </LoadingButton>
                   </form>

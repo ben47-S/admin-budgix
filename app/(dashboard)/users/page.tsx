@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { ResponsiveTableWrapper } from "@/components/ui/responsive-table"
+import { MobileCard } from "@/components/ui/mobile-card"
 import { Search, Eye, Edit, Trash2, Shield, Users as UsersIcon } from "lucide-react"
 
 /**
@@ -105,10 +106,10 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Gestion des Utilisateurs</h1>
-        <p className="text-muted-foreground">Gérez les utilisateurs de la plateforme</p>
+        <h1 className="text-2xl sm:text-3xl font-bold">Gestion des Utilisateurs</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">Gérez les utilisateurs de la plateforme</p>
       </div>
 
       {/* Filtres */}
@@ -118,7 +119,7 @@ export default function UsersPage() {
           <CardDescription>Recherchez et filtrez les utilisateurs</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-4">
             <div className="space-y-2">
               <Label htmlFor="search">Recherche</Label>
               <div className="relative">
@@ -193,60 +194,96 @@ export default function UsersPage() {
             </div>
           ) : (
             <>
-              <ResponsiveTableWrapper>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Utilisateur</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead className="hidden md:table-cell">Téléphone</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead className="hidden lg:table-cell">Transactions</TableHead>
-                      <TableHead className="hidden sm:table-cell">Inscription</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {adminData.users.map((user: User) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.username}</TableCell>
-                        <TableCell>{user.email || "-"}</TableCell>
-                        <TableCell className="hidden md:table-cell">{user.phone}</TableCell>
-                        <TableCell>
-                          <Badge variant={user.isPremium ? "default" : "secondary"}>
-                            {user.isPremium ? "Premium" : "Régulier"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="hidden lg:table-cell">{user._count?.transactions || 0}</TableCell>
-                        <TableCell className="hidden sm:table-cell">{formatDate(user.createdAt)}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <LoadingButton
-                              variant="ghost"
-                              size="icon"
-                              isLoading={navigatingToUserId === user.id}
-                              onClick={() => handleViewUser(user.id)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </LoadingButton>
-                          </div>
-                        </TableCell>
+              {/* Desktop Table */}
+              <div className="hidden md:block">
+                <ResponsiveTableWrapper>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Utilisateur</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead className="hidden md:table-cell">Téléphone</TableHead>
+                        <TableHead>Statut</TableHead>
+                        <TableHead className="hidden lg:table-cell">Transactions</TableHead>
+                        <TableHead className="hidden sm:table-cell">Inscription</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </ResponsiveTableWrapper>
+                    </TableHeader>
+                    <TableBody>
+                      {adminData.users.map((user: User) => (
+                        <TableRow key={user.id}>
+                          <TableCell className="font-medium">{user.username}</TableCell>
+                          <TableCell>{user.email || "-"}</TableCell>
+                          <TableCell className="hidden md:table-cell">{user.phone}</TableCell>
+                          <TableCell>
+                            <Badge variant={user.isPremium ? "default" : "secondary"}>
+                              {user.isPremium ? "Premium" : "Régulier"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="hidden lg:table-cell">{user._count?.transactions || 0}</TableCell>
+                          <TableCell className="hidden sm:table-cell">{formatDate(user.createdAt)}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <LoadingButton
+                                variant="ghost"
+                                size="icon"
+                                isLoading={navigatingToUserId === user.id}
+                                onClick={() => handleViewUser(user.id)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </LoadingButton>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ResponsiveTableWrapper>
+              </div>
+
+              {/* Mobile Cards */}
+              <div className="md:hidden space-y-3">
+                {adminData.users.map((user: User) => (
+                  <MobileCard
+                    key={user.id}
+                    title={user.username}
+                    subtitle={user.email || user.phone}
+                    status={
+                      <Badge variant={user.isPremium ? "default" : "secondary"}>
+                        {user.isPremium ? "Premium" : "Régulier"}
+                      </Badge>
+                    }
+                    metadata={[
+                      { label: "Téléphone", value: user.phone },
+                      { label: "Transactions", value: user._count?.transactions || 0 },
+                      { label: "Inscription", value: formatDate(user.createdAt) }
+                    ]}
+                    actions={
+                      <LoadingButton
+                        variant="outline"
+                        className="w-full min-h-[44px]"
+                        isLoading={navigatingToUserId === user.id}
+                        onClick={() => handleViewUser(user.id)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        Voir le profil
+                      </LoadingButton>
+                    }
+                  />
+                ))}
+              </div>
 
               {/* Pagination pour les admins */}
               {adminData.pagination.totalPages > 1 && (
-                <div className="mt-4 flex items-center justify-between">
+                <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
                   <p className="text-sm text-muted-foreground">
                     Page {adminData.pagination.page} sur {adminData.pagination.totalPages}
                   </p>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 w-full sm:w-auto">
                     <LoadingButton
                       variant="outline"
                       size="sm"
+                      className="flex-1 sm:flex-initial min-h-[44px]"
                       isLoading={isLoadingAdmins}
                       onClick={() => setAdminPage((p) => Math.max(1, p - 1))}
                       disabled={adminPage === 1}
@@ -256,6 +293,7 @@ export default function UsersPage() {
                     <LoadingButton
                       variant="outline"
                       size="sm"
+                      className="flex-1 sm:flex-initial min-h-[44px]"
                       isLoading={isLoadingAdmins}
                       onClick={() => setAdminPage((p) => Math.min(adminData.pagination.totalPages, p + 1))}
                       disabled={adminPage === adminData.pagination.totalPages}
@@ -296,70 +334,117 @@ export default function UsersPage() {
             </div>
           ) : (
             <>
-              <ResponsiveTableWrapper>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Utilisateur</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead className="hidden md:table-cell">Téléphone</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead className="hidden lg:table-cell">Transactions</TableHead>
-                      <TableHead className="hidden sm:table-cell">Inscription</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {data.users.map((user: User) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.username}</TableCell>
-                        <TableCell>{user.email || "-"}</TableCell>
-                        <TableCell className="hidden md:table-cell">{user.phone}</TableCell>
-                        <TableCell>
-                          <Badge variant={user.isPremium ? "default" : "secondary"}>
-                            {user.isPremium ? "Premium" : "Régulier"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="hidden lg:table-cell">{user._count?.transactions || 0}</TableCell>
-                        <TableCell className="hidden sm:table-cell">{formatDate(user.createdAt)}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2 sm:gap-2 gap-3">
-                            <LoadingButton
-                              variant="ghost"
-                              size="icon"
-                              className="min-h-[44px] min-w-[44px]"
-                              isLoading={navigatingToUserId === user.id}
-                              onClick={() => handleViewUser(user.id)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </LoadingButton>
-                            <LoadingButton
-                              variant="ghost"
-                              size="icon"
-                              className="min-h-[44px] min-w-[44px]"
-                              isLoading={deletingUserId === user.id}
-                              onClick={() => handleDeleteUser(user.id)}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </LoadingButton>
-                          </div>
-                        </TableCell>
+              {/* Desktop Table */}
+              <div className="hidden md:block">
+                <ResponsiveTableWrapper>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Utilisateur</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead className="hidden md:table-cell">Téléphone</TableHead>
+                        <TableHead>Statut</TableHead>
+                        <TableHead className="hidden lg:table-cell">Transactions</TableHead>
+                        <TableHead className="hidden sm:table-cell">Inscription</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </ResponsiveTableWrapper>
+                    </TableHeader>
+                    <TableBody>
+                      {data.users.map((user: User) => (
+                        <TableRow key={user.id}>
+                          <TableCell className="font-medium">{user.username}</TableCell>
+                          <TableCell>{user.email || "-"}</TableCell>
+                          <TableCell className="hidden md:table-cell">{user.phone}</TableCell>
+                          <TableCell>
+                            <Badge variant={user.isPremium ? "default" : "secondary"}>
+                              {user.isPremium ? "Premium" : "Régulier"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="hidden lg:table-cell">{user._count?.transactions || 0}</TableCell>
+                          <TableCell className="hidden sm:table-cell">{formatDate(user.createdAt)}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <LoadingButton
+                                variant="ghost"
+                                size="icon"
+                                className="min-h-[44px] min-w-[44px]"
+                                isLoading={navigatingToUserId === user.id}
+                                onClick={() => handleViewUser(user.id)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </LoadingButton>
+                              <LoadingButton
+                                variant="ghost"
+                                size="icon"
+                                className="min-h-[44px] min-w-[44px]"
+                                isLoading={deletingUserId === user.id}
+                                onClick={() => handleDeleteUser(user.id)}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </LoadingButton>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ResponsiveTableWrapper>
+              </div>
+
+              {/* Mobile Cards */}
+              <div className="md:hidden space-y-3">
+                {data.users.map((user: User) => (
+                  <MobileCard
+                    key={user.id}
+                    title={user.username}
+                    subtitle={user.email || user.phone}
+                    status={
+                      <Badge variant={user.isPremium ? "default" : "secondary"}>
+                        {user.isPremium ? "Premium" : "Régulier"}
+                      </Badge>
+                    }
+                    metadata={[
+                      { label: "Téléphone", value: user.phone },
+                      { label: "Transactions", value: user._count?.transactions || 0 },
+                      { label: "Inscription", value: formatDate(user.createdAt) }
+                    ]}
+                    actions={
+                      <>
+                        <LoadingButton
+                          variant="outline"
+                          className="flex-1 min-h-[44px]"
+                          isLoading={navigatingToUserId === user.id}
+                          onClick={() => handleViewUser(user.id)}
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          Voir
+                        </LoadingButton>
+                        <LoadingButton
+                          variant="outline"
+                          className="flex-1 min-h-[44px]"
+                          isLoading={deletingUserId === user.id}
+                          onClick={() => handleDeleteUser(user.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive mr-2" />
+                          Supprimer
+                        </LoadingButton>
+                      </>
+                    }
+                  />
+                ))}
+              </div>
 
               {/* Pagination pour les utilisateurs */}
               {data.pagination.totalPages > 1 && (
-                <div className="mt-4 flex items-center justify-between">
+                <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
                   <p className="text-sm text-muted-foreground">
                     Page {data.pagination.page} sur {data.pagination.totalPages}
                   </p>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 w-full sm:w-auto">
                     <LoadingButton
                       variant="outline"
                       size="sm"
+                      className="flex-1 sm:flex-initial min-h-[44px]"
                       isLoading={isLoading}
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page === 1}
@@ -369,6 +454,7 @@ export default function UsersPage() {
                     <LoadingButton
                       variant="outline"
                       size="sm"
+                      className="flex-1 sm:flex-initial min-h-[44px]"
                       isLoading={isLoading}
                       onClick={() => setPage((p) => Math.min(data.pagination.totalPages, p + 1))}
                       disabled={page === data.pagination.totalPages}

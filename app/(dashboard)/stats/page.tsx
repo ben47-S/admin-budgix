@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { adminApi } from "@/lib/api"
 import { formatCurrency } from "@/lib/utils"
+import { useMobile } from "@/hooks/use-mobile"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   BarChart,
@@ -23,6 +24,7 @@ import {
  * Affiche des graphiques et analyses des données de la plateforme
  */
 export default function StatsPage() {
+  const isMobile = useMobile()
   const { data, isLoading, error } = useQuery({
     queryKey: ["admin-stats"],
     queryFn: async () => {
@@ -78,10 +80,10 @@ export default function StatsPage() {
   const COLORS = ["#f59e0b", "#3b82f6", "#8b5cf6"]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Statistiques Détaillées</h1>
-        <p className="text-muted-foreground">Analyses et graphiques de la plateforme</p>
+        <h1 className="text-2xl sm:text-3xl font-bold">Statistiques Détaillées</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">Analyses et graphiques de la plateforme</p>
       </div>
 
       {/* Graphique de répartition des utilisateurs */}
@@ -91,7 +93,7 @@ export default function StatsPage() {
           <CardDescription>Distribution des utilisateurs par type</CardDescription>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={350}>
+          <ResponsiveContainer width="100%" height={isMobile ? 250 : 350}>
             <PieChart>
               <Pie
                 data={usersData}
@@ -99,11 +101,11 @@ export default function StatsPage() {
                 cy="50%"
                 labelLine={true}
                 label={({ name, value, percent }) => {
-                  // Afficher seulement si > 5% pour éviter le chevauchement
-                  if (percent < 0.05) return null
-                  return `${name}: ${value} (${(percent * 100).toFixed(0)}%)`
+                  // Afficher seulement si > 5% pour éviter le chevauchement sur desktop, 10% sur mobile
+                  if (percent < (isMobile ? 0.10 : 0.05)) return null
+                  return isMobile ? `${(percent * 100).toFixed(0)}%` : `${name}: ${value} (${(percent * 100).toFixed(0)}%)`
                 }}
-                outerRadius={100}
+                outerRadius={isMobile ? 80 : 100}
                 fill="#8884d8"
                 dataKey="value"
               >
@@ -139,7 +141,7 @@ export default function StatsPage() {
           <CardDescription>Comparaison des dépenses et revenus totaux</CardDescription>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={isMobile ? 250 : 300}>
             <BarChart data={transactionsData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
